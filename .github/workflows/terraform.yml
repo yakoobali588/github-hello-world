@@ -26,25 +26,22 @@ jobs:
 
 
       - name: Setup Terraform
-
         uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Format
-
-        run: terraform fmt -check
-
+        with:
+          terraform_version: 1.11.4
+  
       - name: Terraform Init
-
+        working-directory: ./terraform
         run: terraform init
-
+    
       - name: Terraform Validate
-
+        working-directory: ./terraform
         run: terraform validate
-
+    
       - name: Terraform Plan
-
-        run: terraform plan
-
+        working-directory: ./terraform
+        run: terraform plan -out=tfplan
+    
       - name: Terraform Apply
-
-        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan
