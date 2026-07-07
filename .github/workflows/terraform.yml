@@ -24,78 +24,27 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Verify Login
-        run: az account show
-# name: Terraform Deployment
 
-# on:
+      - name: Setup Terraform
 
-#   push:
+        uses: hashicorp/setup-terraform@v3
 
-#     branches:
+      - name: Terraform Format
 
-#       - main
+        run: terraform fmt -check
 
-#   workflow_dispatch:
+      - name: Terraform Init
 
-# permissions:
+        run: terraform init
 
-#   id-token: write
+      - name: Terraform Validate
 
-#   contents: read
+        run: terraform validate
 
-# jobs:
+      - name: Terraform Plan
 
-#   terraform:
+        run: terraform plan
 
-#     runs-on: ubuntu-latest
+      - name: Terraform Apply
 
-#     environment: Production
-
-#     defaults:
-
-#       run:
-
-#         working-directory: terraform
-
-#     steps:
-
-#     - name: Checkout
-
-#       uses: actions/checkout@v4
-
-#     - name: Azure Login
-
-#       uses: azure/login@v2
-
-#       with:
-
-#         client-id: ${{ secrets.AZURE_CLIENT_ID }}
-
-#         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-
-#         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-#     - name: Setup Terraform
-
-#       uses: hashicorp/setup-terraform@v3
-
-#     - name: Terraform Format
-
-#       run: terraform fmt -check
-
-#     - name: Terraform Init
-
-#       run: terraform init
-
-#     - name: Terraform Validate
-
-#       run: terraform validate
-
-#     - name: Terraform Plan
-
-#       run: terraform plan
-
-#     - name: Terraform Apply
-
-#       run: terraform apply -auto-approve
+        run: terraform apply -auto-approve
