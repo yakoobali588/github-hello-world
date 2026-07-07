@@ -1,7 +1,7 @@
 name: Terraform Deploy
 
 on:
-  push:
+ push:
     branches:
       - main
 
@@ -11,9 +11,15 @@ permissions:
 
 jobs:
   terraform:
+
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./terraform
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -24,24 +30,24 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.11.4
-  
+
       - name: Terraform Init
-        working-directory: ./terraform
-        run: terraform init
-    
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.TFSTATE_CONTAINER }}" \
+            -backend-config="key=${{ secrets.TFSTATE_KEY }}"
+
       - name: Terraform Validate
-        working-directory: ./terraform
         run: terraform validate
-    
+
       - name: Terraform Plan
-        working-directory: ./terraform
         run: terraform plan -out=tfplan
-    
+
       - name: Terraform Apply
-        working-directory: ./terraform
         run: terraform apply -auto-approve tfplan
