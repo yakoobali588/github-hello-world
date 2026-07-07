@@ -1,2 +1,1 @@
-# github-hello-world
-github-hello-world
+# Terraform Azure RG
