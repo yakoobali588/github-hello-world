@@ -1,7 +1,74 @@
+# name: Terraform Deploy
+
+# on:
+#  push:
+#     branches:
+#       - main
+
+# permissions:
+#   id-token: write
+#   contents: read
+
+# jobs:
+#   terraform:
+
+#     runs-on: ubuntu-latest
+
+#     defaults:
+#       run:
+#         working-directory: ./terraform
+
+#     steps:
+
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Azure Login
+#         uses: azure/login@v2
+#         with:
+#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: 1.11.4
+
+      
+#       - name: Create backend.tf
+#         working-directory: ./terraform
+#         run: |
+#           cat > backend.tf <<EOF
+#           terraform {
+#             backend "azurerm" {
+#               resource_group_name  = "${{ secrets.TFSTATE_RESOURCE_GROUP }}"
+#               storage_account_name = "${{ secrets.TFSTATE_STORAGE_ACCOUNT }}"
+#               container_name       = "${{ secrets.TFSTATE_CONTAINER }}"
+#               key                  = "${{ secrets.TFSTATE_KEY }}"
+#             }
+#           }
+                
+#       - name: Terraform Init
+#         run: |
+#           terraform init \
+#             -backend-config="resource_group_name=${{ secrets.TFSTATE_RESOURCE_GROUP }}" \
+#             -backend-config="storage_account_name=${{ secrets.TFSTATE_STORAGE_ACCOUNT }}" \
+#             -backend-config="container_name=${{ secrets.TFSTATE_CONTAINER }}" \
+#             -backend-config="key=${{ secrets.TFSTATE_KEY }}"
+
+#       - name: Terraform Validate
+#         run: terraform validate
+
+#       - name: Terraform Plan
+#         run: terraform plan -out=tfplan
+
+#       - name: Terraform Apply
+#         run: terraform apply -auto-approve tfplan
 name: Terraform Deploy
 
 on:
- push:
+  push:
     branches:
       - main
 
@@ -10,9 +77,17 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
 
+##############################################
+# DEV
+##############################################
+
+  terraform-dev:
+
+    name: Deploy Dev
     runs-on: ubuntu-latest
+
+    environment: dev
 
     defaults:
       run:
@@ -35,20 +110,77 @@ jobs:
         with:
           terraform_version: 1.11.4
 
-      
-      - name: Create backend.tf
-        working-directory: ./terraform
+      # - name: Create backend.tf
+      #   run: |
+      #     cat > backend.tf <<EOF
+      #     terraform {
+      #       backend "azurerm" {}
+      #     }
+      #     EOF
+
+      - name: Terraform Init
         run: |
-          cat > backend.tf <<EOF
-          terraform {
-            backend "azurerm" {
-              resource_group_name  = "${{ secrets.TFSTATE_RESOURCE_GROUP }}"
-              storage_account_name = "${{ secrets.TFSTATE_STORAGE_ACCOUNT }}"
-              container_name       = "${{ secrets.TFSTATE_CONTAINER }}"
-              key                  = "${{ secrets.TFSTATE_KEY }}"
-            }
-          }
-                
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.TFSTATE_CONTAINER }}" \
+            -backend-config="key=${{ secrets.TFSTATE_KEY }}"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+
+##############################################
+# PROD
+##############################################
+
+  terraform-prod:
+
+    name: Deploy Production
+
+    needs: terraform-dev
+
+    if: success()
+
+    runs-on: ubuntu-latest
+
+    environment: prod
+
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+
+      # - name: Create backend.tf
+      #   run: |
+      #     cat > backend.tf <<EOF
+      #     terraform {
+      #       backend "azurerm" {}
+      #     }
+      #     EOF
+
       - name: Terraform Init
         run: |
           terraform init \
