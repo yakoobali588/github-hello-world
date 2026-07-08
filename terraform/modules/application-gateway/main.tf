@@ -58,7 +58,14 @@ resource "azurerm_application_gateway" "this" {
     frontend_port_name             = "http-port"
     protocol                       = "Http"
   }
-
+  waf_configuration {
+    enabled                  = true
+    firewall_mode            = "Prevention"
+    rule_set_type            = "OWASP"
+    rule_set_version         = "3.2"
+    file_upload_limit_mb     = 100
+    max_request_body_size_kb = 128
+  }
   request_routing_rule {
     name                       = "default-routing-rule"
     rule_type                  = "Basic"
