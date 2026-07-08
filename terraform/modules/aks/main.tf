@@ -34,10 +34,11 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   network_profile {
-    network_plugin    = "azure"
-    load_balancer_sku = "standard"
-    network_policy    = "azure"
-  }
+  network_plugin     = "azure"
+  service_cidr       = "10.240.0.0/16"
+  dns_service_ip     = "10.240.0.10"
+  docker_bridge_cidr = "172.17.0.1/16"
+}
 
   role_based_access_control_enabled = true
 
