@@ -1,0 +1,40 @@
+name: Hello World Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Display Hello World
+        run: echo "Hello World!"
+
+      - name: Display Date
+        run: date
+
+      - name: Display GitHub Information
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+      - name: List Repository Files
+        run: ls -la
+
+      - name: Pipeline Completed
+        run: echo "GitHub Actions pipeline executed successfully!"
