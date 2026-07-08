@@ -1,5 +1,6 @@
-module "rg" { source="./modules/resource-group"}
-module "network"{source="./modules/network"}
-module "acr"{source="./modules/acr"}
-module "appgw"{source="./modules/application-gateway"}
-module "aks"{source="./modules/aks"}
+resource "azurerm_resource_group" "rg" {
+
+  name     = var.resource_group_name
+  location = var.location
+
+}
