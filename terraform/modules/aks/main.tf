@@ -23,8 +23,8 @@ resource "azurerm_kubernetes_cluster" "this" {
     vm_size                      = var.vm_size
     vnet_subnet_id               = var.subnet_id
     orchestrator_version         = var.kubernetes_version
-    min_count                    = 3
-    max_count                    = 6
+    # min_count                    = 3
+    # max_count                    = 6
     zones                        = ["1", "2", "3"]
     only_critical_addons_enabled = false
   }
