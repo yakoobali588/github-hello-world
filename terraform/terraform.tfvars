@@ -14,8 +14,8 @@ dns_prefix = "aksagicdev"
 appgw_name     = "appgw-agic-dev"
 appgw_capacity = 2
 
-node_count = 3
-vm_size    = "Standard_D4s_v5"
+node_count = 1
+vm_size    = "Standard_D2s_v3"
 
 tags = {
   environment = "dev"
