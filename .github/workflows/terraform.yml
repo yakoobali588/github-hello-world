@@ -3,7 +3,7 @@ name: Terraform Deploy
 on:
  push:
     branches:
-      - module
+      - main
 
 permissions:
   id-token: write
