@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_user_assigned_identity" "agic" {
   name                = "${var.aks_name}-agic-uai"
   resource_group_name = var.resource_group_name
@@ -16,15 +18,14 @@ resource "azurerm_kubernetes_cluster" "this" {
   sku_tier = "Standard"
 
   default_node_pool {
-    name                  = "system"
-    node_count            = var.node_count
-    vm_size               = var.vm_size
-    vnet_subnet_id        = var.subnet_id
-    orchestrator_version  = var.kubernetes_version
-    #auto_scaling_enabled  = true
-    min_count             = 3
-    max_count             = 6
-    zones                 = ["1", "2", "3"]
+    name                         = "system"
+    node_count                   = var.node_count
+    vm_size                      = var.vm_size
+    vnet_subnet_id               = var.subnet_id
+    orchestrator_version         = var.kubernetes_version
+    min_count                    = 3
+    max_count                    = 6
+    zones                        = ["1", "2", "3"]
     only_critical_addons_enabled = false
   }
 
@@ -40,10 +41,6 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   role_based_access_control_enabled = true
 
-  oms_agent {
-    log_analytics_workspace_id = null
-  }
-
   ingress_application_gateway {
     gateway_id = var.app_gateway_id
   }
@@ -58,11 +55,11 @@ resource "azurerm_role_assignment" "acr_pull" {
 resource "azurerm_role_assignment" "agic_reader_rg" {
   scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}"
   role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.agic.principal_id
+  principal_id         = azurerm_kubernetes_cluster.this.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
 }
 
 resource "azurerm_role_assignment" "agic_contributor_appgw" {
   scope                = var.app_gateway_id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_user_assigned_identity.agic.principal_id
+  principal_id         = azurerm_kubernetes_cluster.this.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
 }
